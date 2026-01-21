@@ -1,7 +1,7 @@
 # 🏎️ ISATS Ferrari v2.7.5 Architecture Map
 
-**작성 시각**: 2026-01-21 17:25:00  
-**프로젝트 상태**: Operation Ferrari (Pure Core Phase)  
+**작성 시각**: 2026-01-21 17:30:00  
+**프로젝트 상태**: Operation Ferrari (Autonomous Lifecycle Phase)  
 **가훈**: "화물차의 짐을 버리고, 페라리의 엔진만을 남겼다. 15,000개의 과거는 이제 50개의 미래다."
 
 ---
@@ -10,19 +10,20 @@
 
 ```text
 ISATS_Ferrari/
-├── 📄 commander.py             ⭐ [통합 시동] 채굴-학습-수집-매매 Full Automation
+├── 📄 commander.py             [통합 시동] 채굴-학습-수집-매매 Sequential Starter
 ├── 📄 main.py                  [메인 엔진] 최종 매매 실행 진입점
 │
-├── 📁 config/                  # [중추] 단일 진실 공급원 (Single Source of Truth)
-│   ├── 📄 dna.json             # 유전자 (진화하는 매매 파라미터)
-│   ├── 📄 secrets.yaml         # KIS API 실전 투자 인증 정보
-│   └── 📄 dual_engine.yaml     # 실전+모의 동시 운영 설정
-│
 ├── 📁 core/                    # [기동] 시스템 핵심 인프라
+│   ├── 📄 lifecycle_manager.py  ⭐ [불멸의 심장] 24H 루프 및 무한 진화 관리
 │   ├── 📄 engine.py            # DNA 진화 및 메인 루프 제어
 │   ├── 📄 dual_engine_manager.py # 실전/모의 동시 운영 및 자동 승격 매니저
 │   ├── 📄 realtime_collector.py # 실시간 시세 수집 및 Redis 전송
 │   └── 📄 redis_client.py      # 비중 중추 고속 통신 클라이언트
+│
+├── 📁 config/                  # [중추] 단일 진실 공급원 (Single Source of Truth)
+│   ├── 📄 dna.json             # 유전자 (진화하는 매매 파라미터)
+│   ├── 📄 secrets.yaml         # KIS API + 텔레그램 인증 정보
+│   └── 📄 dual_engine.yaml     # 실전+모의 동시 운영 설정
 │
 ├── 📁 brain/                   # [지능] AI 신경망 시스템
 │   ├── 📄 models.py            # CNN-LSTM 하이브리드 패턴 인식 설계도
@@ -39,6 +40,7 @@ ISATS_Ferrari/
 │   └── 📄 sniper_dragon_dashboard.html # Sniper Dragon 통합 차트 분석기
 │
 ├── 📁 utils/                   # [특수] 고성능 유틸리티
+│   ├── 📄 notifier.py          📡 [전술 통신] 텔레그램 알림 모듈
 │   ├── 📄 mass_data_miner.py   # 대규모 데이터 채굴기 (한미 1,000종목 4년치)
 │   └── 📄 upper_limit_scanner.py # 실시간 상한가/거래량 급증 종목 수색기
 │
@@ -48,31 +50,21 @@ ISATS_Ferrari/
 │   └── 📄 upper_limit_*.csv    # 실시간 수색된 타겟 종목 리스트
 │
 ├── 📁 tests/                   # [검증] 통신 및 로직 테스트
-│   └── � test_kis_api.py      # KIS API 연결 정밀 진단기
+│   └── 📄 test_kis_api.py      # KIS API 연결 정밀 진단기
 │
-├── � database/                # [기록] 로컬 데이터베이스
-└── � logs/                    # [감사] 시스템 실행 로그
+├── 📁 database/                # [기록] 로컬 데이터베이스
+└── 📁 logs/                    # [감사] 시스템 실행 로그
 ```
 
 ---
 
-## 🏎️ 페라리 대전환 보고 (Transformation Summary)
+## 🏎️ 불멸의 주기 (Infinite Evolution Lifecycle)
 
-### 1. 화물 소각 (Purge Legacy)
-- **제거된 파일**: ~14,950개 (archived, archived_simulations, isats(old), etc.)
-- **압축률**: 99.7% 감량 성공.
-- **상태**: 깃(Git) 히스토리에서 모든 구형 데이터를 삭제하고 Pure Core로 재구성.
-
-### 2. 핵심 기능 통합 (Integrated Features)
-- **통합 사령관 (`commander.py`)**: 단 한 줄의 명령으로 [채굴 → 학습 → 수집 → 매매] 자동 실행.
-- **듀얼 엔진**: 실전 계좌의 안정성과 모의 계좌의 공격적 실험을 동시 수행.
-- **실시간 GUI**: Sniper Dragon 아키텍처를 이식하여 시각적 통제력 확보.
-
-### 3. 운용 가이드
-- **시동**: `python ISATS_Ferrari/commander.py`
-- **모니터링**: 브라우저에서 `http://localhost:8080` 접속
-- **업데이트**: `git push origin main` (오직 Ferrari 엔진만 전송됨)
+1. **상시 기동**: `lifecycle_manager.py`가 24시간 상주하며 시스템 감시.
+2. **실시간 보고**: 중요한 순간마다 `notifier.py`가 사령관님께 텔레그램 보고.
+3. **새벽의 진화**: 매일 08:30, 봇이 스스로 매매를 멈추고 데이터를 채굴한 뒤, **Deep Eyes** 신경망을 재학습(Evolution)하여 더 똑똑한 버전으로 부활.
+4. **자동 심폐소생**: 메인 엔진(`main.py`)이 오류로 죽으면 관리자가 즉시 감지하여 재점화.
 
 ---
 
-**"과거의 낡은 엔진을 버리고, 가장 완벽한 50개의 부품만으로 이루어진 페라리가 완성되었습니다."** 🏎️💨
+**"페라리는 이제 스스로 생각하고, 스스로 진화하며, 사령관님께 보고합니다."** 🏎️💨
