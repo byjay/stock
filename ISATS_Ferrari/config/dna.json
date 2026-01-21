@@ -1,0 +1,12 @@
+{
+    "generation": 1,
+    "genes": {
+        "strategy_name": "Adaptive_Volatility_Ferrari",
+        "rsi_period": 14,
+        "stop_loss_pct": 0.02,
+        "take_profit_pct": 0.05,
+        "lookback_window": 100,
+        "risk_level": "Medium"
+    },
+    "last_update": "2026-01-21 13:05:00"
+}
