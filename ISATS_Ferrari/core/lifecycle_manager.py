@@ -28,7 +28,14 @@ class LifecycleManager:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         full_msg = f"[{timestamp}] {msg}"
         print(full_msg)
-        asyncio.run(self.bot.send(msg))
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(self.bot.send(msg))
+            else:
+                asyncio.run(self.bot.send(msg))
+        except:
+            asyncio.run(self.bot.send(msg))
 
     def run_process(self, script_name, wait=True):
         """프로젝트 루트를 기준으로 스크립트 실행"""

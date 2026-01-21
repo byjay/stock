@@ -8,6 +8,7 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 import torch
+import asyncio
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -86,7 +87,14 @@ class ActiveBot:
     def execute_trade(self, action, price):
         """주문 집행 및 알림"""
         print(f"🚀 [Trade] {action} @ {price} (Lens: {self.current_lens}T)")
-        asyncio.run(self.notifier.send(f"전략 집행: {action} / 가격: {price:,}원 / 렌즈: {self.current_lens}분봉"))
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(self.notifier.send(f"전략 집행: {action} / 가격: {price:,}원 / 렌즈: {self.current_lens}분봉"))
+            else:
+                asyncio.run(self.notifier.send(f"전략 집행: {action} / 가격: {price:,}원 / 렌즈: {self.current_lens}분봉"))
+        except RuntimeError:
+            asyncio.run(self.notifier.send(f"전략 집행: {action} / 가격: {price:,}원 / 렌즈: {self.current_lens}분봉"))
         # 실제 주문 API 호출 연동 필요 (kis_api_bridge 등)
 
     def train_overnight(self):
@@ -124,7 +132,14 @@ class ActiveBot:
         # (brain/trainer.py 의 로직을 활용하여 self.memory_buffer로 훈련)
         self.fine_tune_with_today_data()
         
-        asyncio.run(self.notifier.send(f"자가 진화 완료. 내일은 {self.current_lens}분봉으로 시장을 공략합니다."))
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(self.notifier.send(f"자가 진화 완료. 내일은 {self.current_lens}분봉으로 시장을 공략합니다."))
+            else:
+                asyncio.run(self.notifier.send(f"자가 진화형 ActiveBot 엔진 점화 완료."))
+        except:
+            pass
 
     def simulate_lens(self, df, lens):
         """특정 렌즈의 성과 시뮬레이션 (간략화)"""

@@ -20,7 +20,9 @@ class TimeMachineTrainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.ticker = ticker
         self.market = market
-        self.data_path = f"data/{market}/{ticker}.csv"
+        # 데이터 경로 설정 (프로젝트 루트 기준)
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.data_path = os.path.join(project_root, "data", market, f"{ticker}.csv")
         
         # 하이퍼파라미터
         self.seq_length = 60
