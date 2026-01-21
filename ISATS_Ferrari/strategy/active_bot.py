@@ -1,8 +1,15 @@
+import os
+import sys
+
+# 경로 보정: ISATS_Ferrari 폴더를 path에 추가
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 import torch
 import pandas as pd
 import numpy as np
-import os
-import sys
 from datetime import datetime
 from brain.models import HybridCNN_LSTM
 from brain.elastic_time_machine import ElasticTimeMachine
@@ -70,7 +77,7 @@ class ActiveBot:
             prediction = self.model(input_tensor).item()
         
         # 4. 매매 로직 (Reflex)
-        current_price = tick_data['Close']
+        current_price = df_1m.iloc[-1]['Close']
         if prediction > 0.65: # 강력 매수 신호
             self.execute_trade("BUY", current_price)
         elif prediction < 0.35: # 강력 매도 신호

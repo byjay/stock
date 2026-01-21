@@ -4,6 +4,13 @@ import os
 import sys
 import schedule
 import asyncio
+
+# 경로 보정: ISATS_Ferrari 폴더를 path에 추가
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 from datetime import datetime
 from utils.notifier import TelegramBot
 
@@ -23,17 +30,22 @@ class LifecycleManager:
         print(full_msg)
         asyncio.run(self.bot.send(msg))
 
-    def run_process(self, script_path, wait=True):
-        """스크립트 실행"""
+    def run_process(self, script_name, wait=True):
+        """프로젝트 루트를 기준으로 스크립트 실행"""
+        script_path = os.path.join(project_root, script_name)
+        if not os.path.exists(script_path):
+            self.log(f"❌ [Error] 파일을 찾을 수 없음: {script_path}")
+            return None
+            
         cmd = [sys.executable, script_path]
         try:
             if wait:
-                self.log(f"🎬 작전 개시: {script_path}")
-                subprocess.run(cmd, check=True)
+                self.log(f"🎬 작전 개시: {script_name}")
+                subprocess.run(cmd, check=True, cwd=project_root)
                 return True
             else:
-                self.log(f"🚀 백그라운드 투입: {script_path}")
-                return subprocess.Popen(cmd)
+                self.log(f"🚀 백그라운드 투입: {script_name}")
+                return subprocess.Popen(cmd, cwd=project_root)
         except Exception as e:
             self.log(f"🔥 작전 실패 ({script_path}): {e}")
             return None

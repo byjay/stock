@@ -23,7 +23,7 @@ class ElasticTimeMachine:
             df['Date'] = pd.to_datetime(df['Date'])
             df.set_index('Date', inplace=True)
             
-        resampler = df.resample(f'{minutes}T')
+        resampler = df.resample(f'{minutes}min')
         resampled_df = resampler.agg({
             'Open': 'first',
             'High': 'max',

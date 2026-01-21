@@ -4,6 +4,11 @@ import os
 import sys
 import signal
 
+# 경로 보정: ISATS_Ferrari 폴더를 path에 추가
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
 # ==========================================
 # 🎖️ ISATS Ferrari 통합 지휘 통제소 (Commander)
 # ==========================================
