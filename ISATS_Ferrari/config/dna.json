@@ -8,5 +8,10 @@
         "lookback_window": 100,
         "risk_level": "Medium"
     },
-    "last_update": "2026-01-21 13:05:00"
+    "last_update": "2026-01-21 13:05:00",
+    "paths": {
+        "training_data": "./data",
+        "model_save": "./brain/weights",
+        "logs": "./logs"
+    }
 }
