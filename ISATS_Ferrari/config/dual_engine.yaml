@@ -8,8 +8,8 @@ accounts:
     max_position_size: 10000000  # 종목당 최대 1천만원
     
   virtual:
-    kis_app_key: "모의투자_앱키"  # 별도 발급 필요
-    kis_secret_key: "모의투자_시크릿키"
+    kis_app_key: "PSwZrk7YYIoakVSkM2e0uxtcmvekby1CQlzj"
+    kis_secret_key: "RUoIy7xcAUI84NKWzHCU9mldTFDArtZFeHcIkrCAaEB2US7i4Cd/cZn2brPo2nQqoPrR9kQaHVLOA9pcolTqd+17YyP6/LWTwJBHf8lW9kAVS03bzmZFggOw1MiYp7tCuFhGPz6Eke5OZWBPTJDrFdC8bQoA1noQi2XR7BLh/MDTFElQ8F0="
     base_url: "https://openapivts.koreainvestment.com:29443"
     account_no: "50160480-01"
     risk_level: "AGGRESSIVE"  # 3개월 300% 목표 달성을 위한 공격적 모드
