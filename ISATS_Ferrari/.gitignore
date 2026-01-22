@@ -1,0 +1,18 @@
+# ISATS Ferrari v7.0 Git Exclusion List
+secrets.yaml
+*.log
+data/KR/*.csv
+data/US/*.csv
+config/virtual_wallet.json
+*.db
+__pycache__/
+.venv/
+.env
+dist/
+build/
+*.pyc
+.DS_Store
+*.tmp
+temp/
+node_modules/
+.netlify/

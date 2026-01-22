@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔑 ISATS v6.0 - API 키 발급 가이드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .api-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .api-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .api-card h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-card .icon {
+            font-size: 1.5em;
+        }
+
+        .step {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .step h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .step p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .step code {
+            background: #f5f5f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        .link-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .warning strong {
+            color: #856404;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .success strong {
+            color: #155724;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔑 ISATS v6.0 - API 키 발급 가이드</h1>
+            <p>페라리 전력 가동을 위한 필수 API 키 발급 매뉴얼</p>
+        </div>
+
+        <div class="content">
+            <!-- 진행률 표시 -->
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+
+            <!-- 1. SerpApi (Google News) -->
+            <div class="api-card">
+                <h2><span class="icon">📰</span> 1. SerpApi (Google News 수집)</h2>
+
+                <div class="step">
+                    <h3>Step 1: 회원가입</h3>
+                    <p>SerpApi 웹사이트에 접속하여 무료 계정을 생성합니다.</p>
+                    <a href="https://serpapi.com/" target="_blank" class="link-button">
+                        🔗 SerpApi 웹사이트 열기
+                    </a>
+                </div>
+
+                <div class="step">
+                    <h3>Step 2: API 키 발급</h3>
+                    <p>로그인 후 대시보드에서 API 키를 확인합니다.</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>우측 상단 프로필 클릭</li>
+                        <li>"API Key" 메뉴 선택</li>
+                        <li>키 복사 (예: <code>abc123def456...</code>)</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <h3>Step 3: 설정 파일에 저장</h3>
+                    <p><code>config/secrets.yaml</code> 파일을 열어 다음과 같이 추가합니다:</p>
+                    <div class="code-block">
+                        key:
+                        kis_app_key: "YOUR_KIS_KEY"
+                        kis_secret_key: "YOUR_KIS_SECRET"
+                        google_serp_key: "여기에_SerpApi_Key_붙여넣기"
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ 주의:</strong> 무료 플랜은 월 100회 검색 제한이 있습니다. 테스트용으로 충분합니다.
+                </div>
+
+                <div class="success">
+                    <strong>✅ 완료:</strong> SerpApi 키 발급 완료! Google News 수집 준비 완료!
+                </div>
+            </div>
+
+            <!-- 2. DART API (공시 데이터) -->
+            <div class="api-card">
+                <h2><span class="icon">📋</span> 2. DART API (공시 데이터)</h2>
+
+                <div class="step">
+                    <h3>Step 1: 인증키 신청</h3>
+                    <p>DART 오픈API 웹사이트에서 인증키를 신청합니다.</p>
+                    <a href="https://opendart.fss.or.kr/" target="_blank" class="link-button">
+                        🔗 DART 오픈API 웹사이트 열기
+                    </a>
+                </div>
+
+                <div class="step">
+                    <h3>Step 2: 회원가입 및 인증키 발급</h3>
+                    <p>회원가입 후 인증키 발급 메뉴에서 신청합니다.</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>회원가입 (이메일 인증 필요)</li>
+                        <li>"인증키 신청" 메뉴 클릭</li>
+                        <li>신청 후 즉시 발급 (예: <code>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>)</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <h3>Step 3: 설정 파일에 저장</h3>
+                    <p><code>config/secrets.yaml</code> 파일에 추가합니다:</p>
+                    <div class="code-block">
+                        key:
+                        kis_app_key: "YOUR_KIS_KEY"
+                        kis_secret_key: "YOUR_KIS_SECRET"
+                        google_serp_key: "YOUR_SERP_KEY"
+                        dart_api_key: "여기에_DART_API_Key_붙여넣기"
+                    </div>
+                </div>
+
+                <div class="success">
+                    <strong>✅ 완료:</strong> DART API 키 발급 완료! 공시 데이터 수집 준비 완료!
+                </div>
+            </div>
+
+            <!-- 3. Google Gemini API (LLM) -->
+            <div class="api-card">
+                <h2><span class="icon">🧠</span> 3. Google Gemini API (AI 분석)</h2>
+
+                <div class="step">
+                    <h3>Step 1: Google AI Studio 접속</h3>
+                    <p>Google AI Studio에서 무료 API 키를 발급받습니다.</p>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="link-button">
+                        🔗 Google AI Studio 열기
+                    </a>
+                </div>
+
+                <div class="step">
+                    <h3>Step 2: API 키 생성</h3>
+                    <p>로그인 후 "Create API Key" 버튼을 클릭합니다.</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Google 계정으로 로그인</li>
+                        <li>"Create API Key" 클릭</li>
+                        <li>프로젝트 선택 또는 새로 생성</li>
+                        <li>키 복사 (예: <code>AIzaSy...</code>)</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <h3>Step 3: 설정 파일에 저장</h3>
+                    <p><code>config/secrets.yaml</code> 파일에 추가합니다:</p>
+                    <div class="code-block">
+                        key:
+                        kis_app_key: "YOUR_KIS_KEY"
+                        kis_secret_key: "YOUR_KIS_SECRET"
+                        google_serp_key: "YOUR_SERP_KEY"
+                        dart_api_key: "YOUR_DART_KEY"
+                        gemini_api_key: "여기에_Gemini_API_Key_붙여넣기"
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ 주의:</strong> 무료 플랜은 분당 60회 요청 제한이 있습니다.
+                </div>
+
+                <div class="success">
+                    <strong>✅ 완료:</strong> Gemini API 키 발급 완료! AI 분석 준비 완료!
+                </div>
+            </div>
+
+            <!-- 4. 한국투자증권 API (매매) -->
+            <div class="api-card">
+                <h2><span class="icon">💰</span> 4. 한국투자증권 API (실전 매매)</h2>
+
+                <div class="step">
+                    <h3>Step 1: KIS Developers 접속</h3>
+                    <p>한국투자증권 개발자 센터에서 API를 신청합니다.</p>
+                    <a href="https://apiportal.koreainvestment.com/" target="_blank" class="link-button">
+                        🔗 KIS Developers 열기
+                    </a>
+                </div>
+
+                <div class="step">
+                    <h3>Step 2: 앱 등록 및 키 발급</h3>
+                    <p>계좌 개설 후 앱을 등록하고 키를 발급받습니다.</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>한국투자증권 계좌 개설 (필수)</li>
+                        <li>KIS Developers 로그인</li>
+                        <li>"앱 등록" 메뉴에서 신규 앱 생성</li>
+                        <li>APP KEY 및 APP SECRET 복사</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <h3>Step 3: 설정 파일에 저장</h3>
+                    <p><code>config/secrets.yaml</code> 파일에 추가합니다:</p>
+                    <div class="code-block">
+                        key:
+                        kis_app_key: "여기에_KIS_APP_KEY_붙여넣기"
+                        kis_secret_key: "여기에_KIS_SECRET_KEY_붙여넣기"
+                        google_serp_key: "YOUR_SERP_KEY"
+                        dart_api_key: "YOUR_DART_KEY"
+                        gemini_api_key: "YOUR_GEMINI_KEY"
+
+                        mode: "REAL" # 실전 모드 (테스트는 "VRTUAL")
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ 경고:</strong> 실전 모드는 실제 돈이 움직입니다! 테스트는 반드시 가상계좌로!
+                </div>
+
+                <div class="success">
+                    <strong>✅ 완료:</strong> KIS API 키 발급 완료! 실전 매매 준비 완료!
+                </div>
+            </div>
+
+            <!-- 최종 확인 -->
+            <div class="api-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                <h2><span class="icon">🎯</span> 최종 확인</h2>
+
+                <div class="step">
+                    <h3>✅ 체크리스트</h3>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li><input type="checkbox" id="check1"> SerpApi 키 발급 완료</li>
+                        <li><input type="checkbox" id="check2"> DART API 키 발급 완료</li>
+                        <li><input type="checkbox" id="check3"> Gemini API 키 발급 완료</li>
+                        <li><input type="checkbox" id="check4"> KIS API 키 발급 완료</li>
+                        <li><input type="checkbox" id="check5"> <code>config/secrets.yaml</code> 파일 저장 완료</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <h3>🚀 다음 단계</h3>
+                    <p>모든 API 키 발급이 완료되었다면, 다음 명령어로 시스템을 테스트하세요:</p>
+                    <div class="code-block">
+                        # 시스템 무결성 테스트
+                        python ISATS_Ferrari/tests/verify_full_system.py
+
+                        # Ultra Intelligence 테스트
+                        python ISATS_Ferrari/core/ultra_intelligence_engine.py
+
+                        # ETF Special Ops 테스트
+                        python ISATS_Ferrari/core/etf_special_ops.py
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🚀 ISATS v6.0 "Ferrari Full Power" - API 키 발급 가이드</p>
+            <p style="margin-top: 10px; opacity: 0.7;">작성자: ISATS Neural Swarm | 버전: 6.0</p>
+        </div>
+    </div>
+
+    <script>
+        // 체크박스 진행률 업데이트
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const progressBar = document.getElementById('progress');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+
+        function updateProgress() {
+            const total = checkboxes.length;
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const percentage = (checked / total) * 100;
+            progressBar.style.width = percentage + '%';
+        }
+
+        // 페이지 로드 시 애니메이션
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.api-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+
+</html>

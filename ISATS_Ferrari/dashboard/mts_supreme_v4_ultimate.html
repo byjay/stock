@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>🏎️ FERRARI MTS Ultimate v4.0</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25e2f4",
+                        "background-dark": "#0a0c0c",
+                        "panel-dark": "#131b1c",
+                        "trading-red": "#f43f5e",
+                        "trading-blue": "#3b82f6",
+                        "success": "#4ade80",
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+            background-color: #0a0c0c;
+            color: white;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ios-blur {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .gradient-border {
+            border-image: linear-gradient(to bottom, #25e2f4, #3b82f6) 1;
+        }
+
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-btn.active {
+            color: #25e2f4;
+            transform: translateY(-4px);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hoga-bar {
+            height: 100%;
+            transition: width 0.3s ease-out;
+        }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden selection:bg-primary/30">
+    <div
+        class="flex flex-col min-h-screen max-w-[430px] mx-auto border-x border-white/10 relative shadow-2xl shadow-primary/5">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-[110] bg-background-dark/95 ios-blur border-b border-white/5 p-4 py-3">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <div
+                        class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                        <span class="material-symbols-outlined text-primary text-xl pulse-dot">radar</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xs font-black tracking-tighter text-white">FERRARI <span
+                                class="text-primary">ULTIMATE</span></h1>
+                        <p class="text-[8px] text-white/40 uppercase tracking-widest font-mono">Mission: Global
+                            Dominance</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p id="header_balance" class="text-sm font-bold text-white">100,000,000 KRW</p>
+                        <p id="header_profit" class="text-[9px] font-bold text-success">+0.00%</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Engine Status -->
+            <div class="flex gap-2 overflow-x-auto scrollbar-hide">
+                <div
+                    class="flex-none px-3 py-1 bg-white/5 rounded-full border border-white/10 flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-success"></div>
+                    <span class="text-[9px] font-bold text-white/60">SNIPER_ON</span>
+                </div>
+                <div
+                    class="flex-none px-3 py-1 bg-white/5 rounded-full border border-white/10 flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span class="text-[9px] font-bold text-white/60">GLOBAL_MOCK</span>
+                </div>
+                <div
+                    class="flex-none px-3 py-1 bg-white/5 rounded-full border border-white/10 flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+                    <span class="text-[9px] font-bold text-white/40">REAL_SYNC</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 pb-24 overflow-y-auto scrollbar-hide">
+
+            <!-- Tab: HOME -->
+            <section id="tab-home" class="tab-content active p-4 space-y-5">
+                <!-- Sniper Targets -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold">🎯 Sniper Radar</h2>
+                        <span
+                            class="text-[8px] bg-primary/20 text-primary px-2 py-0.5 rounded font-bold uppercase">Aggressive</span>
+                    </div>
+                    <div id="sniper_list" class="space-y-3">
+                        <!-- Dynamic items -->
+                        <div class="animate-pulse bg-white/5 h-20 rounded-2xl w-full"></div>
+                    </div>
+                </div>
+
+                <!-- Global Trends -->
+                <div class="space-y-3">
+                    <h2 class="text-lg font-bold">🌐 Global Industry</h2>
+                    <div id="industry_list" class="grid grid-cols-2 gap-3">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+
+                <!-- ELW Sensitivity -->
+                <div class="space-y-3">
+                    <h2 class="text-lg font-bold">💎 ELW Alpha</h2>
+                    <div id="elw_list" class="glass-card rounded-2xl p-4 divide-y divide-white/5">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: CHART -->
+            <section id="tab-chart" class="tab-content p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 id="chart_symbol" class="text-xl font-bold">005930</h2>
+                        <p id="chart_name" class="text-xs text-white/40">삼성전자</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="chart_price" class="text-xl font-bold text-trading-red">0</p>
+                        <p id="chart_change" class="text-xs text-trading-red">0.00%</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4 h-64 overflow-hidden">
+                    <canvas id="mainChart"></canvas>
+                </div>
+
+                <!-- Order Panel -->
+                <div class="bg-panel-dark/80 rounded-2xl p-5 border border-white/5 space-y-4">
+                    <div class="flex bg-white/5 p-1 rounded-xl">
+                        <button id="btn-buy-mode"
+                            class="flex-1 py-3 rounded-lg bg-trading-red text-white font-bold text-sm">BUY</button>
+                        <button id="btn-sell-mode"
+                            class="flex-1 py-3 rounded-lg text-white/40 font-bold text-sm">SELL</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[9px] text-white/40 uppercase font-black">Quantity</label>
+                            <input type="number" id="order_qty"
+                                class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-lg font-bold"
+                                value="10">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] text-white/40 uppercase font-black">Price</label>
+                            <input type="number" id="order_price"
+                                class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-lg font-bold">
+                        </div>
+                    </div>
+
+                    <button id="btn_execute"
+                        class="w-full h-16 bg-trading-red rounded-2xl text-xl font-black shadow-lg shadow-trading-red/20 active:scale-95 transition-all">
+                        CONFIRM ORDER
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tab: PORTFOLIO -->
+            <section id="tab-portfolio" class="tab-content p-4 space-y-5">
+                <div
+                    class="bg-gradient-to-br from-primary/20 to-blue-600/20 p-6 rounded-3xl border border-white/10 relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 blur-3xl rounded-full"></div>
+                    <p class="text-[10px] text-white/60 uppercase font-black tracking-widest mb-1">Total Valuation</p>
+                    <h2 id="portfolio_total" class="text-3xl font-black mb-4">100,000,000 KRW</h2>
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                        <div>
+                            <p class="text-[8px] text-white/40 uppercase">Buying Power</p>
+                            <p id="portfolio_cash" class="text-sm font-bold">95,000,000</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[8px] text-white/40 uppercase">Total Profit</p>
+                            <p id="portfolio_profit" class="text-sm font-bold text-success">+0.00%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-white/30 uppercase tracking-widest pl-1">Live Positions</h3>
+                    <div id="position_list" class="space-y-3">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: HISTORY -->
+            <section id="tab-history" class="tab-content p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold">📜 Trade Logs</h2>
+                    <span class="text-[10px] text-white/40">Last 50 Entries</span>
+                </div>
+                <div id="history_list" class="glass-card rounded-2xl overflow-hidden divide-y divide-white/5">
+                    <!-- Dynamic items -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Navigation -->
+        <nav
+            class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-background-dark/90 ios-blur border-t border-white/5 flex items-center justify-between px-6 pb-8 pt-3 z-[100]">
+            <button class="nav-btn flex flex-col items-center gap-1.5 active" onclick="switchTab('home', this)">
+                <span class="material-symbols-outlined text-[26px]">home</span>
+                <span class="text-[9px] font-bold">HOME</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1.5 text-white/40" onclick="switchTab('chart', this)">
+                <span class="material-symbols-outlined text-[26px]">monitoring</span>
+                <span class="text-[9px] font-bold">TRADE</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1.5 text-white/40"
+                onclick="switchTab('portfolio', this)">
+                <span class="material-symbols-outlined text-[26px]">account_balance_wallet</span>
+                <span class="text-[9px] font-bold">WALLET</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1.5 text-white/40"
+                onclick="switchTab('history', this)">
+                <span class="material-symbols-outlined text-[26px]">receipt_long</span>
+                <span class="text-[9px] font-bold">HISTORY</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        let currentChart = null;
+        let activeTicker = '005930';
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Tab Management
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active', 'text-primary'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('text-white/40'));
+            btn.classList.add('active', 'text-primary');
+            btn.classList.remove('text-white/40');
+
+            if (tabId === 'chart') initChart(activeTicker);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Data Fetching
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        async function updateStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+
+                // Header & Portfolio
+                const mockBal = data.balances.mock || '0';
+                document.getElementById('header_balance').textContent = mockBal;
+                document.getElementById('portfolio_total').textContent = mockBal;
+                document.getElementById('portfolio_profit').textContent = data.profit_pct;
+
+                // Sniper List (Domestic)
+                renderSniperList(data.positions.mock || []);
+
+                // Portfolio List
+                renderPortfolio(data.positions.mock || []);
+
+                // History List
+                renderHistory(data.trades.mock || []);
+
+            } catch (e) { console.error("Status Sync Error", e); }
+        }
+
+        async function updateAnalysis() {
+            try {
+                const res = await fetch('/api/market/analysis');
+                const data = await res.json();
+                renderIndustry(data.overseas_industry || []);
+                renderELW(data.elw_ranking || []);
+            } catch (e) { console.error("Analysis Sync Error", e); }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Rendering Functions
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function renderSniperList(positions) {
+            const container = document.getElementById('sniper_list');
+            if (positions.length === 0) {
+                container.innerHTML = `<div class="glass-card rounded-2xl p-6 text-center text-white/20 text-xs italic">Seeking high-value targets...</div>`;
+                return;
+            }
+            container.innerHTML = positions.map(pos => `
+                <div class="glass-card rounded-2xl p-4 flex justify-between items-center cursor-pointer active:scale-95 transition-transform" onclick="focusTicker('${pos.ticker}', '${pos.name}')">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center font-black text-primary text-[10px]">${pos.ticker.slice(-2)}</div>
+                        <div>
+                            <p class="font-bold text-sm">${pos.name}</p>
+                            <p class="text-[10px] text-white/30 font-mono">${pos.ticker}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-white">${pos.current_price.toLocaleString()}</p>
+                        <p class="text-[10px] font-bold ${pos.profit >= 0 ? 'text-trading-red' : 'text-trading-blue'}">${pos.profit_pct}%</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderIndustry(industries) {
+            const container = document.getElementById('industry_list');
+            container.innerHTML = industries.map(ind => `
+                <div class="glass-card rounded-2xl p-3 space-y-2">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[9px] font-black text-white/20 uppercase tracking-tighter">${ind.exch_cd || 'US'}</span>
+                        <span class="text-[9px] font-bold text-success">+${(Math.random() * 3).toFixed(2)}%</span>
+                    </div>
+                    <p class="text-[10px] font-bold truncate">${ind.name || 'Sector Trend'}</p>
+                    <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                        <div class="bg-primary h-full" style="width: ${40 + Math.random() * 40}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderELW(elws) {
+            const container = document.getElementById('elw_list');
+            container.innerHTML = elws.map(elw => `
+                <div class="py-2.5 flex justify-between items-center">
+                    <div>
+                        <p class="text-[11px] font-bold">${elw.name}</p>
+                        <p class="text-[9px] text-white/30">${elw.pdno}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-black text-primary">${elw.curr_prc}</p>
+                        <p class="text-[8px] text-white/40">Theta: ${(Math.random() * -0.5).toFixed(3)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPortfolio(positions) {
+            const container = document.getElementById('position_list');
+            container.innerHTML = positions.map(pos => `
+                <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-sm font-bold">${pos.name}</p>
+                        <p class="text-[9px] text-white/30">${pos.qty} SHARES @ ${pos.avg_price.toLocaleString()}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-white">${(pos.qty * pos.current_price).toLocaleString()}</p>
+                        <p class="text-[10px] font-bold ${pos.profit >= 0 ? 'text-trading-red' : 'text-trading-blue'}">${pos.profit_pct}%</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderHistory(trades) {
+            const container = document.getElementById('history_list');
+            container.innerHTML = trades.map(t => `
+                <div class="p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg ${t.action === '매수' ? 'bg-trading-red/10 text-trading-red' : 'bg-trading-blue/10 text-trading-blue'} flex items-center justify-center font-bold text-[10px]">${t.action.slice(0, 1)}</div>
+                        <div>
+                            <p class="text-xs font-bold">${t.ticker}</p>
+                            <p class="text-[9px] text-white/30 font-mono">${t.timestamp}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold">${t.price.toLocaleString()}</p>
+                        <p class="text-[9px] text-white/40">${t.qty} QTY</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Chart & Trading
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        async function initChart(ticker) {
+            try {
+                const res = await fetch(`/api/chart/${ticker}`);
+                const data = await res.json();
+
+                const ctx = document.getElementById('mainChart').getContext('2d');
+                if (currentChart) currentChart.destroy();
+
+                const labels = data.chart.map(c => c.stck_cntg_hour.slice(0, 4)).reverse();
+                const prices = data.chart.map(c => parseFloat(c.stck_prpr)).reverse();
+
+                document.getElementById('chart_price').textContent = prices[prices.length - 1].toLocaleString();
+                document.getElementById('order_price').value = prices[prices.length - 1];
+
+                currentChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: prices,
+                            borderColor: '#25e2f4',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: true,
+                            backgroundColor: (context) => {
+                                const gradient = context.chart.ctx.createLinearGradient(0, 0, 0, 200);
+                                gradient.addColorStop(0, 'rgba(37, 226, 244, 0.2)');
+                                gradient.addColorStop(1, 'transparent');
+                                return gradient;
+                            },
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                        scales: { x: { display: false }, y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#444', font: { size: 9 } } } }
+                    }
+                });
+            } catch (e) { console.error("Chart Init Error", e); }
+        }
+
+        function focusTicker(ticker, name) {
+            activeTicker = ticker;
+            document.getElementById('chart_symbol').textContent = ticker;
+            document.getElementById('chart_name').textContent = name;
+            switchTab('chart', document.querySelectorAll('.nav-btn')[1]);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Lifecycle
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        setInterval(updateStatus, 3000);
+        setInterval(updateAnalysis, 10000);
+        updateStatus();
+        updateAnalysis();
+
+    </script>
+</body>
+
+</html>

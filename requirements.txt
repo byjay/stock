@@ -1,0 +1,13 @@
+torch
+pandas
+numpy
+finance-datareader
+yfinance
+aiohttp
+PyYAML
+schedule
+tqdm
+python-telegram-bot
+requests
+scipy
+scikit-learn

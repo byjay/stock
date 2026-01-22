@@ -1,0 +1,8 @@
+{
+    "timeframe": "5T",
+    "ma_short": 6,
+    "ma_long": 21,
+    "take_profit": 0.481,
+    "stop_loss": 0.028,
+    "vol_factor": 1.3
+}

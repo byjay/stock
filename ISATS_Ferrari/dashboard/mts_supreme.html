@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>FERRARI SUPREME MTS - 통합 지휘 본부</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25e2f4",
+                        "background-dark": "#0a0c0c",
+                        "panel-dark": "#131b1c",
+                        "trading-red": "#f43f5e",
+                        "trading-blue": "#3b82f6",
+                        "success": "#4ade80",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans KR", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+            background-color: #0a0c0c;
+            color: white;
+        }
+
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .scanline {
+            background: linear-gradient(to bottom, rgba(37, 226, 244, 0.05) 50%, transparent 50%);
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden selection:bg-primary/30">
+    <div class="flex flex-col min-h-screen max-w-[430px] mx-auto border-x border-white/10 relative">
+
+        <!-- Header -->
+        <header
+            class="sticky top-0 z-50 bg-background-dark/90 ios-blur border-b border-white/5 p-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+                    <span class="material-symbols-outlined text-primary text-xl">speed</span>
+                </div>
+                <div>
+                    <h1 class="text-xs font-black tracking-tighter text-white">FERRARI <span
+                            class="text-primary italic">SUPREME</span></h1>
+                    <p class="text-[8px] text-white/40 uppercase tracking-widest font-mono">v2.8.0 • <span
+                            id="header_mode">VIRTUAL</span></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p id="header_balance" class="text-sm font-bold text-primary">$10,000.00</p>
+                    <p id="header_profit" class="text-[9px] font-bold text-success">+0.00%</p>
+                </div>
+                <button class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm">notifications</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 pb-24">
+
+            <!-- Tab: Home -->
+            <section id="tab-home" class="tab-content active p-4 space-y-6">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2 glass-card rounded-2xl p-5 relative overflow-hidden">
+                        <div class="scanline absolute inset-0 pointer-events-none opacity-20"></div>
+                        <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">AI Integrated
+                            Command</p>
+                        <h2 class="text-2xl font-black text-white">$<span id="home_total_asset">10,000.00</span></h2>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="text-xs font-bold text-success">+0.0% P/L Today</span>
+                            <div class="h-1 flex-1 bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary w-[30%]"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4">
+                        <p class="text-[9px] font-bold text-white/30 uppercase">Ticks Collected</p>
+                        <p id="home_tick_count" class="text-lg font-bold text-primary">0</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-4">
+                        <p class="text-[9px] font-bold text-white/30 uppercase">System Status</p>
+                        <p class="text-lg font-bold text-success">OPTIMAL</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-white/50 tracking-[0.2em] uppercase">Global Radar Top 5</h3>
+                    <div id="home_radar_preview" class="space-y-2">
+                        <!-- Dynamic Radar Items -->
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-white/50 tracking-[0.2em] uppercase">AI Thought Log</h3>
+                    <div id="home_ai_log"
+                        class="bg-black/40 border border-white/5 rounded-xl p-4 font-mono text-[10px] text-primary/80 space-y-1">
+                        <p>> [SYSTEM] Global Watcher Initiated...</p>
+                        <p>> [AI] Sentiment Analysis: Bullish on Tech Pre-market</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Market -->
+            <section id="tab-market" class="tab-content p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold">Global Hunter Radar</h2>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 bg-primary/20 text-primary text-[10px] font-bold rounded">KRX</button>
+                        <button class="px-3 py-1 bg-white/5 text-white/60 text-[10px] font-bold rounded">US</button>
+                    </div>
+                </div>
+                <div id="market_radar_list" class="space-y-2">
+                    <!-- Radar List -->
+                </div>
+            </section>
+
+            <!-- Tab: Trade -->
+            <section id="tab-trade" class="tab-content p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold" id="trade_ticker_name">AAPL</h2>
+                        <p class="text-xs text-white/40" id="trade_ticker_code">APPLE INC.</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold text-trading-red" id="trade_current_price">$185.20</p>
+                        <p class="text-[10px] text-trading-red">+2.45% ▲</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 h-64 border-y border-white/5 py-2">
+                    <!-- Hoga simulation -->
+                    <div class="w-1/2 flex flex-col" id="order_book_asks">
+                        <!-- Asks -->
+                    </div>
+                    <div class="w-1/2 flex flex-col" id="order_book_bids">
+                        <!-- Bids -->
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex gap-2">
+                        <button class="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold"
+                            onclick="setOrderType('LIMIT')">LIMIT</button>
+                        <button
+                            class="flex-1 py-3 bg-primary/20 text-primary border border-primary/40 rounded-xl text-xs font-bold"
+                            onclick="setOrderType('MARKET')">MARKET</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-1">
+                            <label class="text-[9px] text-white/40 uppercase font-bold">Price</label>
+                            <input type="number" id="order_price"
+                                class="w-full bg-white/5 border-white/10 rounded-lg text-sm font-bold" value="185.20">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] text-white/40 uppercase font-bold">Qty</label>
+                            <input type="number" id="order_qty"
+                                class="w-full bg-white/5 border-white/10 rounded-lg text-sm font-bold" value="10">
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button
+                            class="flex-1 h-14 bg-trading-blue rounded-xl font-black text-lg active:scale-95 transition-transform"
+                            onclick="submitOrder('SELL')">SELL</button>
+                        <button
+                            class="flex-1 h-14 bg-trading-red rounded-xl font-black text-lg active:scale-95 transition-transform"
+                            onclick="submitOrder('BUY')">BUY</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Asset -->
+            <section id="tab-asset" class="tab-content p-4 space-y-6">
+                <div class="bg-primary/10 border border-primary/20 rounded-2xl p-5">
+                    <p class="text-sm font-medium text-white/60">Evaluation Assets</p>
+                    <h2 class="text-3xl font-black text-primary" id="asset_total">$10,000.00</h2>
+                    <div class="flex justify-between mt-4 pt-4 border-t border-white/5">
+                        <div>
+                            <p class="text-[10px] text-white/40 uppercase">Buying Power</p>
+                            <p class="text-sm font-bold" id="asset_cash">$10,000.00</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-white/40 uppercase">Total P/L</p>
+                            <p class="text-sm font-bold text-success" id="asset_profit">+0.00%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-white/50 tracking-widest uppercase">Current Positions</h3>
+                    <div id="portfolio_list" class="space-y-3">
+                        <!-- Position Cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Logic -->
+            <section id="tab-logic" class="tab-content space-y-4">
+                <div class="p-4 border-b border-white/5">
+                    <h2 class="text-lg font-bold">AI Cognitive Flow</h2>
+                    <p class="text-xs text-primary font-bold">Neural Core v2.8 Execution Logic</p>
+                </div>
+
+                <div class="px-4 space-y-6">
+                    <!-- Logic Trace -->
+                    <div
+                        class="bg-[#0c1415] rounded-xl border border-white/10 overflow-hidden font-mono text-[10px] leading-relaxed">
+                        <div class="bg-white/5 px-3 py-1.5 flex items-center gap-2 border-b border-white/5 text-[9px]">
+                            <span class="text-white/40">active_bot.py</span>
+                        </div>
+                        <div class="p-4 space-y-1 text-white/60">
+                            <p class="text-primary/50">448 def check_veto_status(self, trade):</p>
+                            <p>449 risk = trade.calc_exposure()</p>
+                            <p>450 if risk > self.max_allowed:</p>
+                            <p class="text-primary bg-primary/10">451 return Decision(VETO, "LIMIT_EXCEEDED")</p>
+                        </div>
+                    </div>
+
+                    <!-- Decision Nodes -->
+                    <div class="space-y-4">
+                        <div class="flex gap-4 items-start">
+                            <div
+                                class="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center text-success">
+                                <span class="material-symbols-outlined text-sm">check</span>
+                            </div>
+                            <div class="flex-1 border-b border-white/5 pb-4">
+                                <p class="text-sm font-bold">Fractal Chaos Filter</p>
+                                <p class="text-[10px] text-white/40">Confidence Score: 0.94</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div
+                                class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary animate-pulse">
+                                <span class="material-symbols-outlined text-sm">hourglass_empty</span>
+                            </div>
+                            <div class="flex-1 pb-4">
+                                <p class="text-sm font-bold">Elastic Time Projection</p>
+                                <p class="text-[10px] text-white/40">Analyzing 4T, 7T, 13T Prime candles...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Navigation Bar -->
+        <nav
+            class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-background-dark/80 ios-blur border-t border-white/5 flex items-center justify-between px-6 pb-6 pt-2 z-[100]">
+            <button class="nav-btn flex flex-col items-center gap-1 active text-primary"
+                onclick="switchTab('home', this)">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-[9px] font-bold">HOME</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-white/40" onclick="switchTab('market', this)">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="text-[9px] font-bold">RADAR</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-white/40" onclick="switchTab('trade', this)">
+                <span class="material-symbols-outlined">token</span>
+                <span class="text-[9px] font-bold">TRADE</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-white/40" onclick="switchTab('asset', this)">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <span class="text-[9px] font-bold">ASSET</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-white/40" onclick="switchTab('logic', this)">
+                <span class="material-symbols-outlined">psychology</span>
+                <span class="text-[9px] font-bold">LOGIC</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Initialization & API Sync Script -->
+    <script>
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('text-primary'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('text-white/40'));
+            btn.classList.remove('text-white/40');
+            btn.classList.add('text-primary');
+        }
+
+        async function updateData() {
+            try {
+                // Status Sync
+                const statusResp = await fetch('/api/status');
+                const status = await statusResp.json();
+
+                document.getElementById('header_mode').innerText = status.engine_mode;
+                document.getElementById('header_balance').innerText = status.balance;
+                document.getElementById('header_profit').innerText = status.profit_pct;
+                document.getElementById('home_total_asset').innerText = status.balance.replace('$', '');
+                document.getElementById('home_tick_count').innerText = status.tick_total;
+                document.getElementById('asset_total').innerText = status.balance;
+                document.getElementById('asset_profit').innerText = status.profit_pct;
+
+                // Radar Sync
+                const radarResp = await fetch('/api/radar');
+                const radar = await radarResp.json();
+
+                const combined = [...radar.kr, ...radar.us];
+
+                // Update Home Preview
+                const homeRadar = document.getElementById('home_radar_preview');
+                homeRadar.innerHTML = '';
+                combined.slice(0, 5).forEach(stock => {
+                    homeRadar.innerHTML += `
+                        <div class="flex justify-between items-center p-3 glass-card rounded-lg border-none">
+                            <div class="flex items-center gap-3">
+                                <div class="w-1 h-6 bg-primary/40 rounded-full"></div>
+                                <div>
+                                    <p class="text-xs font-bold">${stock.name}</p>
+                                    <p class="text-[8px] text-white/30">${stock.ticker}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-primary">+${stock.change.toFixed(2)}%</span>
+                        </div>
+                    `;
+                });
+
+                // Update Market List
+                const marketRadar = document.getElementById('market_radar_list');
+                marketRadar.innerHTML = '';
+                combined.forEach(stock => {
+                    marketRadar.innerHTML += `
+                        <div class="flex justify-between items-center p-4 glass-card rounded-xl border-white/5 cursor-pointer hover:bg-white/5 transition-colors" onclick="selectTicker('${stock.ticker}', '${stock.name}')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center font-bold text-primary text-xs">
+                                    ${stock.ticker.slice(0, 2)}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold">${stock.name}</p>
+                                    <p class="text-[10px] text-white/40">${stock.market} | ${stock.ticker}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-primary">+${stock.change.toFixed(2)}%</p>
+                                <p class="text-[9px] text-white/20">Active Monitoring</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Wallet Sync
+                const walletResp = await fetch('/api/wallet');
+                const wallet = await walletResp.json();
+                document.getElementById('asset_cash').innerText = `$${wallet.cash.toLocaleString()}`;
+
+                const portfolio = document.getElementById('portfolio_list');
+                portfolio.innerHTML = '';
+                Object.entries(wallet.portfolio).forEach(([ticker, data]) => {
+                    portfolio.innerHTML += `
+                        <div class="glass-card rounded-xl p-4 space-y-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold">${ticker}</h4>
+                                    <p class="text-[10px] text-white/40">${data.qty} Shares</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-primary">+${data.profit_pct}%</p>
+                                    <p class="text-[10px] text-white/40">$${data.avg_price.toLocaleString()} Avg</p>
+                                </div>
+                            </div>
+                            <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary" style="width: 65%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (e) { console.error("Update error", e); }
+        }
+
+        function selectTicker(ticker, name) {
+            document.getElementById('trade_ticker_name').innerText = name;
+            document.getElementById('trade_ticker_code').innerText = ticker;
+            switchTab('trade', document.querySelectorAll('.nav-btn')[2]);
+        }
+
+        async function submitOrder(side) {
+            const ticker = document.getElementById('trade_ticker_code').innerText;
+            const price = document.getElementById('order_price').value;
+            const qty = document.getElementById('order_qty').value;
+
+            if (!qty || qty <= 0) return alert("Quantity required");
+
+            const resp = await fetch('/api/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticker, side, price, qty })
+            });
+            const result = await resp.json();
+            if (result.success) {
+                alert(`${side} Order executed: ${ticker}`);
+                updateData();
+            } else {
+                alert("Order failed: " + result.error);
+            }
+        }
+
+        setInterval(updateData, 5000);
+        updateData();
+    </script>
+</body>
+
+</html>

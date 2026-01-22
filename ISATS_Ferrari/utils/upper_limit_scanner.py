@@ -1,141 +1,112 @@
-import aiohttp
-import asyncio
-import yaml
-import json
+import FinanceDataReader as fdr
+import pandas as pd
+import datetime
 import os
-from datetime import datetime
+import sys
+import yfinance as yf
+
+# 경로 보정
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # ==========================================
-# 🎯 KIS API 상한가 종목 스캐너
+# 📡 MARKET RADAR (KR/US 상한가 및 주도주 레이더)
 # ==========================================
 
-async def get_upper_limit_stocks():
-    """오늘의 상한가 종목 가져오기"""
-    
-    # 1. 설정 로드
-    config_path = "ISATS_Ferrari/config/secrets.yaml"
-    with open(config_path, 'r', encoding='utf-8') as f:
-        config = yaml.safe_load(f)
-    
-    app_key = config['key']['kis_app_key']
-    app_secret = config['key']['kis_secret_key']
-    base_url = "https://openapi.koreainvestment.com:9443"
-    
-    print("="*60)
-    print(f"      🎯 오늘의 상한가 종목 스캔 ({datetime.now().strftime('%Y-%m-%d %H:%M')})")
-    print("="*60)
-    
-    # 2. Access Token 발급
-    print("\n📡 [Step 1] Access Token 발급 중...")
-    auth_url = f"{base_url}/oauth2/tokenP"
-    payload = {
-        "grant_type": "client_credentials",
-        "appkey": app_key,
-        "appsecret": app_secret
-    }
-    
-    timeout = aiohttp.ClientTimeout(total=10)
-    
-    async with aiohttp.ClientSession(timeout=timeout) as session:
-        # 토큰 발급
-        async with session.post(auth_url, json=payload) as resp:
-            token_data = await resp.json()
-            access_token = token_data.get('access_token')
+class MarketRadar:
+    def __init__(self, market="KRX"):
+        self.market = market
+        self.today = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    def scan_kr_hot_stocks(self, top_n=20):
+        print(f"\n📡 [Radar-KR] {self.today} 한국 시장 주도주 스캔 중...")
+        try:
+            df = fdr.StockListing("KRX")
+            if 'ChagesRatio' in df.columns:
+                target_col = 'ChagesRatio'
+            elif 'Change' in df.columns:
+                df['ChagesRatio'] = df['Change'] * 100
+                target_col = 'ChagesRatio'
+            else:
+                return []
+
+            hot_stocks = df[df[target_col] >= 15.0].copy()
+            if 'Amount' in hot_stocks.columns:
+                hot_stocks = hot_stocks.sort_values(by=[target_col, 'Amount'], ascending=False)
+            else:
+                hot_stocks = hot_stocks.sort_values(by=[target_col], ascending=False)
             
-            if not access_token:
-                print(f"❌ 토큰 발급 실패: {token_data}")
-                return
+            results = []
+            for idx, row in hot_stocks.head(top_n).iterrows():
+                code = row['Code']
+                name = row['Name']
+                change = row[target_col]
+                market_type = row.get('Market', 'KOSPI')
+                suffix = ".KS" if "KOSPI" in market_type else ".KQ"
+                results.append({'ticker': f"{code}{suffix}", 'name': name, 'change': change, 'market': 'KR'})
             
-            print(f"✅ Access Token 발급 완료")
-        
-        # 3. 상한가 종목 조회 (등락률 상위 종목 API 활용)
-        print("\n📊 [Step 2] 상한가 종목 조회 중...")
-        
-        # KIS API: 국내주식 등락률 순위 조회
-        rank_url = f"{base_url}/uapi/domestic-stock/v1/quotations/volume-rank"
-        
-        headers = {
-            "content-type": "application/json; charset=utf-8",
-            "authorization": f"Bearer {access_token}",
-            "appkey": app_key,
-            "appsecret": app_secret,
-            "tr_id": "FHPST01710000"  # 등락률 순위 조회 TR
-        }
-        
-        params = {
-            "FID_COND_MRKT_DIV_CODE": "J",  # 주식
-            "FID_COND_SCR_DIV_CODE": "20171",  # 등락률 상위
-            "FID_INPUT_ISCD": "0000",  # 전체
-            "FID_DIV_CLS_CODE": "0",  # 전체
-            "FID_BLNG_CLS_CODE": "0",  # 평균거래량
-            "FID_TRGT_CLS_CODE": "111111111",  # 전체
-            "FID_TRGT_EXLS_CLS_CODE": "000000",
-            "FID_INPUT_PRICE_1": "",
-            "FID_INPUT_PRICE_2": "",
-            "FID_VOL_CNT": "",
-            "FID_INPUT_DATE_1": ""
-        }
-        
-        async with session.get(rank_url, headers=headers, params=params) as resp:
-            if resp.status != 200:
-                text = await resp.text()
-                print(f"❌ API 호출 실패 (Status: {resp.status})")
-                print(f"   응답: {text}")
-                return
+            return results
+        except Exception as e:
+            print(f"❌ [Radar-KR Error] {e}")
+            return []
+
+    def scan_us_premarket_hot_stocks(self, top_n=20):
+        print(f"\n📡 [Radar-US] 미국 시장 실시간 급등주 스캔 중 (yfinance)...")
+        try:
+            # 변동성 높은 종목 풀 (대형주 제외, 중소형 성장주 중심)
+            momentum_pool = [
+                # 테크 중소형주
+                "PLTR", "COIN", "MARA", "RIOT", "MSTR", "UPST", "AFRM", "SQ", "OPEN",
+                # 바이오/헬스케어
+                "MRNA", "BNTX", "NVAX", "CRSP", "EDIT", "BEAM",
+                # EV/신재생
+                "LCID", "RIVN", "XPEV", "NIO", "LI", "ENPH", "SEDG",
+                # 레버리지 ETF (급등락)
+                "TQQQ", "SQQQ", "SOXL", "SOXS", "TSLL", "TSLS",
+                # 기타 고변동성
+                "GME", "AMC", "BBBY", "HOOD", "SOFI", "DKNG"
+            ]
             
-            data = await resp.json()
+            scanned = []
+            print(f"🔍 {len(momentum_pool)}개 급등 후보 종목 스캔 중...")
             
-            # 4. 결과 파싱
-            if data.get('rt_cd') != '0':
-                print(f"❌ 조회 실패: {data.get('msg1')}")
-                return
-            
-            stocks = data.get('output', [])
-            
-            if not stocks:
-                print("⚠️ 상한가 종목이 없거나 데이터를 가져올 수 없습니다.")
-                return
-            
-            # 5. 상한가 종목 필터링 (등락률 +29% 이상)
-            upper_limit_stocks = []
-            for stock in stocks:
+            for sym in momentum_pool[:top_n]:
                 try:
-                    change_rate = float(stock.get('prdy_ctrt', '0'))  # 전일대비율
-                    if change_rate >= 29.0:  # 상한가 기준
-                        upper_limit_stocks.append({
-                            'code': stock.get('mksc_shrn_iscd'),
-                            'name': stock.get('hts_kor_isnm'),
-                            'price': stock.get('stck_prpr'),
-                            'change_rate': change_rate,
-                            'volume': stock.get('acml_vol')
-                        })
-                except:
+                    ticker = yf.Ticker(sym)
+                    hist = ticker.history(period="1d", interval="1m")
+                    if not hist.empty:
+                        current = hist['Close'].iloc[-1]
+                        prev_close = hist['Open'].iloc[0]
+                        change = ((current - prev_close) / prev_close) * 100
+                        volume = hist['Volume'].sum()
+                        
+                        # 급등 조건: 변동률 절대값 > 2% 또는 거래량 급증
+                        if abs(change) > 2.0 or volume > 1000000:
+                            scanned.append({
+                                'ticker': sym,
+                                'name': sym,
+                                'price': round(current, 2),
+                                'change': round(change, 2),
+                                'volume': volume,
+                                'market': 'US',
+                                'signal': 'HOT' if change > 0 else 'COLD'
+                            })
+                except Exception as e:
                     continue
             
-            # 6. 결과 출력
-            print(f"\n🎉 [Result] 상한가 종목 {len(upper_limit_stocks)}개 발견!")
-            print("="*60)
+            # 변동률 기준 정렬 (절대값)
+            scanned.sort(key=lambda x: abs(x['change']), reverse=True)
+            print(f"🔥 [Detection-US] 급등 후보 {len(scanned)}개 포착 완료")
+            return scanned
             
-            if upper_limit_stocks:
-                for i, stock in enumerate(upper_limit_stocks[:10], 1):  # 상위 10개만
-                    print(f"{i:2d}. [{stock['code']}] {stock['name']}")
-                    print(f"    가격: {stock['price']:>10}원 | 등락률: +{stock['change_rate']:.2f}% | 거래량: {stock['volume']}")
-                    print()
-            else:
-                print("⚠️ 오늘은 상한가 종목이 없습니다.")
-            
-            print("="*60)
-            
-            # 7. CSV 저장
-            if upper_limit_stocks:
-                import pandas as pd
-                df = pd.DataFrame(upper_limit_stocks)
-                save_path = f"ISATS_Ferrari/data/upper_limit_{datetime.now().strftime('%Y%m%d')}.csv"
-                df.to_csv(save_path, index=False, encoding='utf-8-sig')
-                print(f"💾 저장 완료: {save_path}")
+        except Exception as e:
+            print(f"❌ [Radar-US Error] {e}")
+            return []
 
 if __name__ == "__main__":
-    if os.name == 'nt':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    radar = MarketRadar()
+    kr_targets = radar.scan_kr_hot_stocks(top_n=5)
+    us_targets = radar.scan_us_premarket_hot_stocks(top_n=5)
     
-    asyncio.run(get_upper_limit_stocks())
+    print("\n🎯 [Global Target Locked]")
+    for t in kr_targets + us_targets:
+        print(f"   - [{t['market']}] {t['name']} ({t['ticker']}): +{t['change']:.2f}%")

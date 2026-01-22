@@ -1,0 +1,10 @@
+{
+  "stop_loss_pct": -10.0,
+  "take_profit_pct": 30.0,
+  "win_rate": 49.5,
+  "avg_profit": 5.911857870894038,
+  "total_profit": 5911.857870894039,
+  "method": "REAL_DATA_BACKTEST",
+  "n_tickers": 99,
+  "timestamp": "2026-01-21T23:28:52.887037"
+}

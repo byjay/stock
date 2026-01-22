@@ -1,69 +1,100 @@
 import asyncio
 import os
 import sys
-from datetime import datetime
+import pandas as pd
 
-# 경로 보정: ISATS_Ferrari 폴더를 path에 추가
+# 모듈 경로 보정
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
-from strategy.active_bot import ActiveBot
+from core.auto_market_scanner import AutoScanner
+from core.watchers import SniperAgent, ScoutAgent, PatrolAgent
+from core.system_monitor import SystemMonitor
 
-async def main_engine():
-    print("\n" + "="*50)
-    print("      🏎️  ISATS v2.0 'FERRARI' IGNITION SEQUENCE      ")
-    print("="*50)
-    
-    # 1. 전략(운전자) 탑승
-    try:
-        bot = ActiveBot()
-        print(f"✅ [Driver] 전략 '{bot.ticker}' 초기화 완료.")
-        print(f"   -> 현재 렌즈: {bot.current_lens}분봉")
-    except Exception as e:
-        print(f"❌ [Error] 전략 초기화 실패: {e}")
-        return
+# ==========================================
+# ISATS Main Engine
+# 역할: 시스템 초기화 및 감시 에이전트 실행 조율
+# ==========================================
 
-    # 2. 데이터 수집기(연료 펌프) 연결 확인
-    data_dir = "data"
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-        print("⛽ [Fuel] 데이터 저장소가 비어있어 새로 생성했습니다.")
-    else:
-        print(f"⛽ [Fuel] 데이터 저장소 연결됨 ({len(os.listdir(data_dir))} files).")
+class MainEngine:
+    def __init__(self):
+        """기본 설정 및 모니터 초기화"""
+        self.target_file = "daily_target_list.csv"
+        self.targets = {'S': [], 'A': [], 'B': []}
+        self.monitor = SystemMonitor()
 
-    print("\n🚀 [System] 엔진 시동 중... (Ctrl+C로 종료)")
-    await asyncio.sleep(1) # 부팅 연출
-    
-    # 3. 메인 루프 (무한 주행)
-    loop_count = 0
-    try:
-        while True:
-            # A. 시장 데이터 수집 (실제 구현 시 Redis/API에서 가져옴)
-            # 현재는 엔진 가동 확인을 위한 시뮬레이션 데이터 유입
-            market_data = {
-                'Date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'Open': 50000, 'High': 50500, 'Low': 49500, 'Close': 50000, 'Volume': 123456
-            }
+    def initialize(self):
+        """시스템 부팅 및 사전 점검"""
+        print("[Boot] ISATS Engine initializing...")
+        
+        # 1. 핵심 하드웨어/네트워크 자원 진단
+        status = self.monitor.run_diagnostics()
+        if status['status'] != 'OK':
+            print("❌ 초기화 실패: 시스템 리소스 혹은 네트워크 상태를 점검하십시오.")
+            return False
             
-            # B. 두뇌 판단 (틱 데이터 입력)
-            bot.on_tick(market_data)
-            
-            # C. 생존 신고 (로그) - 10초마다
-            if loop_count % 10 == 0:
-                print(f"   ⏱️ [Loop {loop_count}] 상태: 엔진 가동 중 | 렌즈: {bot.current_lens}T | 메모리: {len(bot.memory_buffer)} 틱")
-            
-            loop_count += 1
-            await asyncio.sleep(1) # 1초 틱
+        # 2. 공략 종목 리스트 확인 및 스캔
+        if not os.path.exists(self.target_file):
+            print("⚠️ 타겟 리스트가 없습니다. 실시간 스캐너를 가동합니다...")
+            try:
+                # 스캐너 인스턴스 실행
+                scanner = AutoScanner()
+                scanner.run_scan()
+            except Exception as e:
+                print(f"⚠️ 스캐너 실행 중 오류 발생: {e}")
+        
+        return self._load_targets()
 
-    except KeyboardInterrupt:
-        print("\n🛑 [Stop] 사용자에 의한 엔진 정지.")
-    except Exception as e:
-        print(f"\n🔥 [Crash] 치명적 오류 발생: {e}")
+    def _load_targets(self):
+        """리스트에서 등급별 전술적 타겟 분배"""
+        try:
+            if not os.path.exists(self.target_file):
+                 raise FileNotFoundError("타겟 파일 부재")
+                 
+            df = pd.read_csv(self.target_file)
+            # Tier 분배 규정 (Top 3: S, 4~10: A, 이후: B)
+            self.targets['S'] = df.iloc[:3]['Ticker'].tolist()
+            self.targets['A'] = df.iloc[3:10]['Ticker'].tolist()
+            self.targets['B'] = df.iloc[10:20]['Ticker'].tolist()
+            
+            print(f"✅ 타겟 로드 완료: S({len(self.targets['S'])}), A({len(self.targets['A'])}), B({len(self.targets['B'])})")
+            return True
+        except Exception as e:
+            print(f"❌ 타겟 파일 분석 실패: {e}. 기본 관찰 종목으로 전환합니다.")
+            self.targets['S'] = ["005930.KS"] # 예시 (삼성전자)
+            return True
+
+    async def run_loop(self):
+        """등급별 전술 에이전트 병렬 기동"""
+        print("[Engine] 전술 에이전트 그룹(Sniper, Scout, Patrol) 기동 중...")
+        
+        # 등급별 특화 에이전트 인스턴스 생성
+        sniper = SniperAgent(self.targets['S'])
+        scout = ScoutAgent(self.targets['A'])
+        patrol = PatrolAgent(self.targets['B'])
+        
+        try:
+            # 병렬 감시 시작
+            await asyncio.gather(
+                sniper.run(),
+                scout.run(),
+                patrol.run()
+            )
+        except KeyboardInterrupt:
+            print("\n[Engine] 중단 요청 수신. 안전 종료 절차를 시작합니다.")
+
+    def start(self):
+        """메인 엔진 서비스 시작"""
+        if self.initialize():
+            try:
+                # 에이전트 루프 진입
+                if os.name == 'nt':
+                    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+                asyncio.run(self.run_loop())
+            except KeyboardInterrupt:
+                pass
 
 if __name__ == "__main__":
-    # 윈도우 비동기 루프 정책 설정 (필요시)
-    if os.name == 'nt':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        
-    asyncio.run(main_engine())
+    engine = MainEngine()
+    engine.start()
