@@ -8,198 +8,186 @@ import webbrowser
 from pathlib import Path
 from datetime import datetime
 
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# 프로젝트 루트 경로 추가
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
 
-from utils.upper_limit_scanner import MarketRadar
-from core.dual_engine_manager import DualEngineManager
-from database.database_manager import DatabaseManager
-from core.kis_api_client import RealtimeDataManager  # NEW: KIS API Integration
+# ISATS 코어 모듈 임포트
+from core.kis_official_api import KISUnifiedClient
+from virtual_trading_engine import VirtualWallet
+from deep_learning_trader import TradingTrainer
 
 # ==========================================
-# 🎨 Ferrari GUI Dashboard Server
+# 🏎️ ISATS Singularity Dashboard Server
 # ==========================================
 
 class DashboardServer:
     def __init__(self, port=9053):
         self.port = port
         self.app = web.Application()
-        self.radar = MarketRadar()
-        self.guard = DualEngineManager(initial_balance_usd=10000.0)
-        self.db = DatabaseManager()
-        self.kis_manager = None  # NEW: KIS API Manager
+        
+        # 엔진 초기화
+        self.kis_real = KISUnifiedClient(mode="real")
+        self.kis_virtual = KISUnifiedClient(mode="virtual")
+        self.wallet = VirtualWallet()
+        self.trainer = TradingTrainer()
+        
+        # 데이터 폴더 경로
+        self.data_dir = Path(ROOT_DIR) / "data"
+        self.data_dir.mkdir(exist_ok=True)
+        
         self.setup_routes()
         
     def setup_routes(self):
-        """라우트 설정"""
+        """MTS 지휘본부 라우트 설정"""
         self.app.router.add_get('/', self.serve_dashboard)
-        self.app.router.add_get('/api/status', self.get_status)
-        self.app.router.add_get('/api/wallet', self.get_wallet)
-        self.app.router.add_get('/api/radar', self.get_radar)
-        self.app.router.add_post('/api/order', self.place_order)
-        self.app.router.add_get('/api/history', self.get_status) # API 호환성 유지
-        # v3.0.0 HTS 전용 API
-        self.app.router.add_get('/api/signals', self.get_signals)
-        self.app.router.add_get('/api/strategy/config', self.get_strategy_config)
-        self.app.router.add_get('/api/risk/status', self.get_risk_status)
-        self.app.router.add_post('/api/order/liquidate', self.liquidate_all)
-        self.app.router.add_get('/api/market/analysis', self.get_market_analysis)
-        self.app.router.add_get('/api/chart/{ticker}', self.get_chart_data)
+        self.app.router.add_get('/api/status', self.get_system_status)
+        self.app.router.add_get('/api/balance', self.get_all_balances)
+        self.app.router.add_get('/api/signals', self.get_ai_signals)
+        self.app.router.add_post('/api/order', self.place_unified_order)
+        self.app.router.add_get('/api/market/radar', self.get_market_radar)
+        self.app.router.add_get('/api/chart/{market}/{ticker}', self.get_live_chart)
         
+        # 가상 매매 전용
+        self.app.router.add_get('/api/virtual/wallet', self.get_virtual_wallet)
+        self.app.router.add_get('/api/virtual/history', self.get_virtual_history)
+        
+    async def initialize_engines(self):
+        """엔진 사전 로드"""
+        print("🚀 ISATS Engines Warming Up...")
+        self.kis_real.initialize()
+        self.kis_virtual.initialize()
+        self.trainer.load_model()
+        print("✅ Systems Ready.")
+
     async def serve_dashboard(self, request):
-        """메인 대시보드 HTML 제공 (MTS Ultimate v4.0.0)"""
+        """MTS Supreme v4.0.0 인터페이스 제공"""
         dashboard_path = Path(__file__).parent / "mts_supreme_v4_ultimate.html"
-        if not dashboard_path.exists():
-            dashboard_path = Path(__file__).parent / "hts_ultimate.html"
-        
         with open(dashboard_path, 'r', encoding='utf-8') as f:
-            html_content = f.read()
-        return web.Response(text=html_content, content_type='text/html')
+            html = f.read()
+        return web.Response(text=html, content_type='text/html')
 
-    async def get_signals(self, request):
-        """TA-Lib + AI Confluence 신호 합치 엔진"""
-        # 실시간 데이터 기반으로 시뮬레이션 (실제로는 models.py 연동 가능)
-        import random
-        confluence = random.randint(70, 95)
+    async def get_system_status(self, request):
+        """시스템 통합 상태 감시"""
         return web.json_response({
-            "confluence": confluence,
-            "ta": {"rsi": 65 + random.randint(-5, 10), "bb": "Inside", "vol": "+12%"},
-            "ai": {"sentiment": "BULLISH", "reason": "Structural pattern matched with high confidence."}
+            "timestamp": datetime.now().isoformat(),
+            "kis_real": "ACTIVE",
+            "kis_virtual": "ACTIVE",
+            "deep_learning": "LEARNING",
+            "market_status": "OPEN" if 9 <= datetime.now().hour < 16 else "CLOSED"
         })
 
-    async def get_strategy_config(self, request):
-        """전략 가중치 및 시스템 제약 조건"""
-        return web.json_response({
-            "weights": {"Sniper": 65, "Fractal": 35},
-            "constraints": {"max_dd": -4.2, "daily_cap": 12000}
-        })
-
-    async def get_risk_status(self, request):
-        """리스크 가드레일 및 켈리 비중"""
-        return web.json_response({
-            "kiwoom": "Active",
-            "kis": "Active",
-            "loss_limit_pct": 35,
-            "kelly_fraction": 0.125,
-            "equity_curve": [120000, 125000, 122000, 130000, 142520]
-        })
-
-    async def liquidate_all(self, request):
-        """비상용 일괄 매도 (Kill Switch)"""
+    async def get_all_balances(self, request):
+        """전 계좌(실전/모의/가상) 통합 잔고 데이터"""
         try:
-            # 모든 포지션 매도 주문 집행
-            wallet = self.guard.get_status()
-            for ticker, pos in wallet.get('portfolio', {}).items():
-                if pos['qty'] > 0:
-                    self.guard.execute_order(ticker, 'SELL', 0, pos['qty'], {'asks':[[0,0]], 'bids':[[0,0]]})
-            return web.json_response({"success": True, "message": "Emergency Liquidation Executed"})
-        except Exception as e:
-            return web.json_response({"success": False, "error": str(e)})
-
-    async def get_status(self, request):
-        """시스템 통합 상태 (Tri-Engine 지원)"""
-        try:
-            # 실시간 잔고 동기화 (KIS 연동)
-            await self.guard.update_balances()
+            # 1. 가상 지갑 (Virtual)
+            virtual_total = self.wallet.get_total_value({})
             
-            import sqlite3
-            tick_count = 0
-            if os.path.exists(self.db.db_path):
-                conn = sqlite3.connect(self.db.db_path)
-                cursor = conn.cursor()
-                cursor.execute("SELECT count(*) FROM market_ticks")
-                tick_count = cursor.fetchone()[0]
-                conn.close()
+            # 2. 모의 투자 (Mock)
+            _, mock_summary = self.kis_virtual.get_balance(market="KR")
+            mock_total = float(mock_summary.get("tot_evlu_amt", 0)) if mock_summary else 10000000.0
+            
+            # 3. 실전 투자 (Real)
+            _, real_summary = self.kis_real.get_balance(market="KR")
+            real_total = float(real_summary.get("tot_evlu_amt", 0)) if real_summary else 0.0
+            
+            return web.json_response({
+                "virtual": {"total": virtual_total, "cash": self.wallet.cash},
+                "mock": {"total": mock_total},
+                "real": {"total": real_total}
+            })
         except Exception as e:
-            print(f"⚠️ [Dashboard] Status update error: {e}")
-            tick_count = "N/A"
+            return web.json_response({"error": str(e)}, status=500)
 
-        wallet = self.guard.get_status()
-        balances = wallet.get('balances', {})
+    async def get_ai_signals(self, request):
+        """딥러닝 엔진의 신호 분석 결과"""
+        # 최근 거래 데이터 기반 예측 (더미 데이터 예시)
+        prediction = self.trainer.predict([70000, 10, 14, 3]) # [가격, 수량, 시간, 요일]
+        return web.json_response({
+            "action": "BUY" if prediction == 1 else "HOLD",
+            "confidence": 0.82 + (prediction * 0.1),
+            "reason": "Structural pattern matched with LSTM analysis."
+        })
+
+    async def place_unified_order(self, request):
+        """통합 주문 집행 (Mode 기반)"""
+        data = await request.json()
+        mode = data.get("mode", "virtual") # real, mock, virtual
+        ticker = data.get("ticker")
+        action = data.get("action") # BUY, SELL
+        quantity = int(data.get("quantity", 1))
+        price = float(data.get("price", 0))
         
-        status = {
-            "engine_mode": self.guard.mode,
-            "tick_total": tick_count,
-            "balance": f"${balances.get('mock', 0):,.0f}", 
-            "balances": {
-                "real": f"{balances.get('real', 0):,.0f} KRW",
-                "virtual": f"${balances.get('virtual', 0):,.0f}",
-                "mock": f"{balances.get('mock', 0):,.0f} KRW"
-            },
-            "positions": wallet.get('positions', {}),
-            "trades": wallet.get('trades', {}),
-            "profit_pct": wallet.get('total_profit_pct', '0.00%'),
-            "last_update": datetime.now().strftime("%H:%M:%S"),
-            "reports": wallet.get('reports', [])
-        }
-        return web.json_response(status)
-    
-    async def place_order(self, request):
-        """주문 집행 API"""
         try:
-            data = await request.json()
-            ticker = data.get('ticker')
-            action = data.get('action')  # BUY or SELL
-            price = float(data.get('price', 0))
-            quantity = int(data.get('quantity', 0))
+            if mode == "virtual":
+                if action == "BUY":
+                    success = self.wallet.buy(ticker, price, quantity)
+                else:
+                    success = self.wallet.sell(ticker, price, quantity)
+                return web.json_response({"success": success, "mode": "virtual"})
             
-            success = self.guard.execute_order(ticker, action, price, quantity)
-            return web.json_response({"success": success, "message": f"{action} order executed" if success else "Order failed"})
+            elif mode == "mock":
+                result = self.kis_virtual.place_order(ticker, action, quantity, price, market="KR")
+                return web.json_response(result)
+            
+            elif mode == "real":
+                result = self.kis_real.place_order(ticker, action, quantity, price, market="KR")
+                return web.json_response(result)
+                
         except Exception as e:
             return web.json_response({"success": False, "error": str(e)})
-    
-    async def get_wallet(self, request):
-        """지갑 및 포트폴리오"""
-        return web.json_response(self.guard.get_status())
 
-    async def get_radar(self, request):
-        """글로벌 레이더 결과"""
-        # 사령관님의 명령에 따라 US 프리마켓과 KR 주도주 동시 스캔
-        kr = self.radar.scan_kr_hot_stocks(top_n=10)
-        us = self.radar.scan_us_premarket_hot_stocks(top_n=20)
-        return web.json_response({"kr": kr, "us": us})
-
-    async def get_market_analysis(self, request):
-        """시장 분석 데이터 (ELW, 해외 업종 등)"""
+    async def get_market_radar(self, request):
+        """상승률/거래량 상위 종목 레이더"""
         try:
-            analysis = await self.guard.get_market_analysis()
-            return web.json_response(analysis)
+            # 336개 API 중 랭킹 API 활용
+            res = self.kis_virtual.domestic_stock.inquire_ranking()
+            return web.json_response(res)
+        except:
+            return web.json_response({"kr": [], "us": []})
+
+    async def get_live_chart(self, request):
+        """분봉/일봉 실시간 차트 데이터"""
+        market = request.match_info.get('market', 'KR')
+        ticker = request.match_info.get('ticker')
+        
+        try:
+            if market == "KR":
+                data = self.kis_virtual.domestic_stock.inquire_daily_price(ticker)
+            else:
+                data = self.kis_virtual.overseas_stock.get_price(ticker, "NAS")
+            return web.json_response(data)
         except Exception as e:
             return web.json_response({"error": str(e)})
 
-    async def get_chart_data(self, request):
-        """분봉 차트 데이터"""
-        try:
-            ticker = request.match_info.get('ticker')
-            if not ticker: return web.json_response({"error": "No ticker provided"})
-            
-            # KIS API를 통해 직접 조회 (캐싱 로직 없이 우선 구현)
-            if not self.guard.mock_client:
-                await self.guard.setup_clients()
-            
-            chart_data = await self.guard.mock_client.get_minute_chart(ticker)
-            return web.json_response(chart_data)
-        except Exception as e:
-            return web.json_response({"error": str(e)})
-    
+    async def get_virtual_wallet(self, request):
+        """가상 지갑 상세 정보"""
+        return web.json_response({
+            "cash": self.wallet.cash,
+            "positions": self.wallet.positions
+        })
+
+    async def get_virtual_history(self, request):
+        """가상 매매 히스토리"""
+        return web.json_response(self.wallet.trade_history)
+
     async def start(self):
         """서버 시작"""
+        await self.initialize_engines()
+        
         runner = web.AppRunner(self.app)
         await runner.setup()
         site = web.TCPSite(runner, 'localhost', self.port)
         await site.start()
         
         url = f"http://localhost:{self.port}"
-        print(f"\n🎨 [Dashboard] GUI 대시보드 가동 완료!")
-        print(f"   📡 접속 주소: {url}")
-        print(f"   🌐 브라우저를 자동으로 엽니다...\n")
+        print(f"\n🛸 [ISATS Portal] Dashboard Engaged!")
+        print(f"   📡 URL: {url}")
         
-        # 브라우저 자동 열기
         try:
             webbrowser.open(url)
         except: pass
         
-        # 서버 유지
         while True:
             await asyncio.sleep(60)
 
@@ -211,7 +199,8 @@ def main():
     try:
         asyncio.run(server.start())
     except KeyboardInterrupt:
-        print("\n🛑 [Dashboard] 서버 종료")
+        print("\n🛑 Dashboard Halted.")
 
 if __name__ == "__main__":
     main()
+

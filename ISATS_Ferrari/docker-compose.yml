@@ -1,105 +1,79 @@
-# 🐳 ISATS v7.0 Docker Compose Configuration
+# 🐳 ISATS v7.5 "Singularity" Docker Compose Configuration
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 version: '3.8'
 
 services:
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  # Redis (Message Broker)
+  # Virtual Trading Engine (The Teacher)
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  redis:
-    image: redis:7-alpine
-    container_name: isats_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    restart: unless-stopped
-    networks:
-      - isats_network
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  # Control Tower API (FastAPI + WebSocket)
-  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  api_server:
+  virtual_engine:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: isats_api_server
-    ports:
-      - "8000:8000"
+    container_name: isats_virtual_engine
     volumes:
-      - ./data:/app/data
-      - ./brain:/app/brain
-      - ./config:/app/config
-      - ./logs:/app/logs
+      - .:/app
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - PYTHONUNBUFFERED=1
       - TZ=Asia/Seoul
-    depends_on:
-      redis:
-        condition: service_healthy
-    command: python api_server.py
+    command: python virtual_trading_engine.py
     restart: unless-stopped
     networks:
       - isats_network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  # Main Engine (Watchers + Trading)
+  # Domestic Mock Trading Launcher
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  main_engine:
+  domestic_pilot:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: isats_main_engine
+    container_name: isats_domestic_pilot
     volumes:
-      - ./data:/app/data
-      - ./brain:/app/brain
-      - ./config:/app/config
-      - ./logs:/app/logs
+      - .:/app
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - PYTHONUNBUFFERED=1
       - TZ=Asia/Seoul
-    depends_on:
-      redis:
-        condition: service_healthy
-      api_server:
-        condition: service_healthy
-    command: python main.py
+    command: python auto_trading_launcher.py --mode virtual
     restart: unless-stopped
     networks:
       - isats_network
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  # Dashboard (Nginx)
+  # US Mock Trading Launcher
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  dashboard:
-    image: nginx:alpine
-    container_name: isats_dashboard
-    ports:
-      - "80:80"
+  overseas_pilot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: isats_overseas_pilot
     volumes:
-      - ./dashboard:/usr/share/nginx/html:ro
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - api_server
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Seoul
+    command: python us_trading_launcher.py --mode virtual
+    restart: unless-stopped
+    networks:
+      - isats_network
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Dashboard Command Center (MTS Backend)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  dashboard_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: isats_dashboard_server
+    ports:
+      - "9053:9053"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Seoul
+    command: python dashboard/server.py
     restart: unless-stopped
     networks:
       - isats_network
@@ -107,15 +81,6 @@ services:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Networks
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 networks:
   isats_network:
     driver: bridge
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Volumes
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-volumes:
-  redis_data:
-    driver: local

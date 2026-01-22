@@ -1,0 +1,72 @@
+{
+  "cash": 80656400,
+  "positions": {
+    "000660": {
+      "quantity": 6,
+      "avg_price": 755000,
+      "type": "STOCK",
+      "market": "KR"
+    },
+    "035420": {
+      "quantity": 20,
+      "avg_price": 245500,
+      "type": "STOCK",
+      "market": "KR"
+    },
+    "051910": {
+      "quantity": 14,
+      "avg_price": 350500,
+      "type": "STOCK",
+      "market": "KR"
+    },
+    "233740": {
+      "quantity": 415,
+      "avg_price": 12040,
+      "type": "ETF",
+      "market": "KR"
+    }
+  },
+  "trade_history": [
+    {
+      "time": "2026-01-22T22:16:25.941731",
+      "ticker": "000660",
+      "action": "BUY",
+      "price": 755000,
+      "quantity": 6,
+      "total": 4530000,
+      "market": "KR",
+      "type": "STOCK"
+    },
+    {
+      "time": "2026-01-22T22:16:26.746853",
+      "ticker": "035420",
+      "action": "BUY",
+      "price": 245500,
+      "quantity": 20,
+      "total": 4910000,
+      "market": "KR",
+      "type": "STOCK"
+    },
+    {
+      "time": "2026-01-22T22:16:28.385294",
+      "ticker": "051910",
+      "action": "BUY",
+      "price": 350500,
+      "quantity": 14,
+      "total": 4907000,
+      "market": "KR",
+      "type": "STOCK"
+    },
+    {
+      "time": "2026-01-22T22:16:52.626633",
+      "ticker": "233740",
+      "action": "BUY",
+      "price": 12040,
+      "quantity": 415,
+      "total": 4996600,
+      "market": "KR",
+      "type": "ETF"
+    }
+  ],
+  "last_updated": "2026-01-22T22:16:52.626633"
+}

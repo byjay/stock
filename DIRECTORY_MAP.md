@@ -1,46 +1,48 @@
-# 🦅 ISATS PHOENIX v7.0 DIRECTORY MAP (Standardized)
+# 🦅 ISATS PHOENIX v7.5 "SINGULARITY" DIRECTORY MAP
 
 ## 1. System Overview
-**ISATS Phoenix v7.0**은 기존의 비직관적인 명칭을 배제하고, 산업 표준(Industrial Standard)에 맞춘 네이밍과 구조를 채택한 지능형 매매 시스템입니다. 모든 핵심 모듈은 S-Class 수준의 문서화와 타입 힌트를 준수하며, 환경적 리스크(API 속도 제한, 데이터 지연)에 대한 자동 방어 체계를 갖추고 있습니다.
+**ISATS Phoenix v7.5 "Singularity"**는 한국투자증권의 336개 전체 Open API와 딥러닝 트랜스포머 엔진을 통합한 차세대 매매 지휘본부입니다. 모의투자, 가상매매, 실전투자 세 가지 모드를 완벽히 지원하며, 가상매매를 통해 생성된 데이터를 딥러닝 모델이 실시간으로 학습하여 실전 전략으로 승격시킵니다.
 
 ## 2. Core Directory Structure
 
-### 📂 Root Directory
-- `main.py`: **System Command Center**. 시스템 초기화, 자원 점검, 다중 에이전트(Sniper, Scout, Patrol) 조율 및 실행.
-- `api_server.py`: **Communication Hub**. FastAPI 기반 WebSocket/REST 서버. Redis 데이터를 대시보드로 중계.
-- `antigravity_agent.py`: **Intelligence Orchestrator**. 종목 분석, 리포트 생성, 시스템 진단을 수행하는 AI 에이전트.
-- `Dockerfile` & `docker-compose.yml`: **Virtualization**. 시스템의 컨테이너화 및 배포 정의.
+### 📂 Root Directory (Launcher)
+- `auto_trading_launcher.py`: **Domestic Pilot**. 국내주식 자동매매 엔진.
+- `us_trading_launcher.py`: **Overseas Pilot**. 미국주식 자동매매 엔진 (프리마켓/정규장).
+- `virtual_trading_engine.py`: **Virtual Master**. 전 종목(주식, ETF, 선물) 가상매매 통합 엔진.
+- `deep_learning_trader.py`: **ML Brain**. 거래 내역 학습 및 최적 매매 시점 예측 엔진.
+- `check_accounts.py`: **Account Auditor**. 전 계좌(실전/모의/가상) 잔고 및 수익률 검증기.
 
 ### 📂 core/ (Standard Engines)
-- `system_monitor.py`: **Resource Monitor**. CPU, RAM, 네트워크, **Redis Latency(50ms Warning)** 모니터링.
-- `risk_manager.py`: **Market Risk Guard**. Turbulence Index를 활용해 시장 상태(Crash, Bull, Normal) 판단.
-- `signal_validator.py`: **Standard Validator**. 기술적 신호의 유효성(거래량, 상위 추세, 스프레드) 최종 필터링.
-- `kis_api_client.py`: **API Bridge**. 한국투자증권 API 연동. **Adaptive Backoff(429 Error)** 기능 포함.
-- `redis_client.py`: **Data Backbone**. 고속 데이터 교환을 위한 Redis 인터페이스.
+- `kis_official_api.py`: **Unified API Client**. 336개 API 통합 인터페이스.
+- `kis_api_registry.py`: **API Registry**. 전체 엔드포인트 및 TR_ID 메타데이터 저장소.
+- `system_monitor.py`: **Resource Monitor**. 시스템 부화 및 네트워크 레이턴시 관리.
 
-### � strategy/ (Tactical Pilots)
-- `active_bot.py`: **Standard Trading Pilot**. DNA(Target Profit/Stop Loss/Timeframe) 연동형 실전 매매 봇.
-- `strategy_factory.py`: DNA 정보를 바탕으로 실전 전략 객체 생성.
+### 📂 dashboard/ (MTS Command Center)
+- `server.py`: **FastAPI/Aiohttp Server**. 실시간 데이터 스트리밍 및 주문 중계 서버.
+- `mts_supreme_v4_ultimate.html`: **The Ultimate MTS**. 페라리 디자인 기반의 고성능 거래 인터페이스.
+- `KIS_AI_COMPLETE_GUIDE.md`: **Standard Operating Procedure**. 모든 API 및 시스템 활용 가이드.
 
-### � brain/ (Evolutionary Center)
-- `genesis_evolution_v2.py`: **Strategy Breeder**. SignalValidator가 통합된 유전 알고리즘 훈련소.
-- `task.md`: 현재 작업 진행률 및 로드맵 관리.
+### 📂 kis_official_modules/ (Official Framework)
+- 한국투자증권 공식 제공 31개 모듈 (국내/해외 주식, 채권, 선물옵션, ELW, ETF 전체 포함).
 
-### 📂 reports/ (Audit & Results)
-- `TOTAL_AUDIT_REPORT.md`: 시스템 전체 코드 퀄리티 감사 결과.
-- `walkthrough.md`: 단계별 구현 및 검증 결과 기록.
+### 📂 data/ (Information Assets)
+- `virtual_wallet.json`: 가상 매매 지갑 및 거래 내역.
+- `trading_model.pth`: 딥러닝 학습 모델 파일.
+- `logs/`: 모든 엔진의 실행 기록.
 
 ## 3. Technology Stack
-- **Language**: Python 3.10+ (Static Typing)
-- **Framework**: FastAPI (API), PyTorch (Optional Training), Pandas/Numpy (Analysis)
-- **Infrastructure**: Redis (Cache/Streaming), Docker (Deployment)
-- **Principles**: MECE, Solid Pillars of Trading, High-Quality Documentation
+- **AI**: PyTorch LSTM/Transformer (Strategy Optimization)
+- **API**: KIS Open API 336 (REST + WebSocket)
+- **UI**: Vanilla JS + TailwindCSS (Premium MTS Aesthetics)
+- **Server**: Aiohttp / WebSocket
 
-## 4. Execution (Real-Battle Mode)
-1. **Docker Build**: `docker-compose build`
-2. **System Launch**: `docker-compose up -d`
-3. **Internal Core**: `main.py` -> `SystemMonitor` Check -> `ActiveBot` Sortie.
+## 4. Operational Flow
+1. **Initialize**: `kis_official_api.py`를 통한 전 시장(KR/US/Futures) 토큰 발급.
+2. **Execute**: `virtual_trading_engine.py` 가동으로 전 종목 가상 매매 데이터 생성.
+3. **Learn**: `deep_learning_trader.py`가 거래 데이터를 학습하여 최적 가중치 산출.
+4. **Command**: `dashboard/server.py` 실행 후 MTS를 통해 실시간 지휘.
 
 ---
-**"Standardization is the Foundation of Excellence."**
-**v7.0 Standard Edition Fully Approved.**
+**"Data is the Fuel, AI is the Engine, MTS is the Cockpit."**
+**v7.5 Singularity Edition Fully Approved.**
+
